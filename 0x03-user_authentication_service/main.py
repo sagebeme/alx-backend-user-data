@@ -1,111 +1,85 @@
 #!/usr/bin/env python3
-"""
-Main file
-"""
+""" Testing module """
+
+
 import requests
 
 
 def register_user(email: str, password: str) -> None:
-    """register_user
-    """
-    resp = requests.post('http://127.0.0.1:5000/users',
-                         data={'email': email, 'password': password})
-    if resp.status_code == 200:
-        assert (resp.json() == {"email": email, "message": "user created"})
-    else:
-        assert(resp.status_code == 400)
-        assert (resp.json() == {"message": "email already registered"})
+    """ register new user """
+    r = requests.post('http://127.0.0.1:5000/users', data={
+        'email': email,
+        'password': password
+    })
+    assert r.status_code == 200
+    assert r.json() == {'email': email, 'message': "user created"}
 
 
 def log_in_wrong_password(email: str, password: str) -> None:
-    """_summary_
-
-    Args:
-        email (str): _description_
-        password (str): _description_
-    """
-    payload = {'email': email, 'password': password}
-    r = requests.post('http://localhost:5000/sessions', data=payload)
+    """ login with wrong pswd """
+    r = requests.post('http://127.0.0.1:5000/sessions', data={
+        'email': email,
+        'password': password
+    })
     assert r.status_code == 401
 
 
-def profile_unlogged() -> None:
-    """_summary_
-    """
-    r = requests.get('http://localhost:5000/profile')
-    assert r.status_code == 403
-
-
 def log_in(email: str, password: str) -> str:
-    """_summary_
-
-    Args:
-        email (str): _description_
-        password (str): _description_
-
-    Returns:
-        str: _description_
-    """
-    payload = {'email': email, 'password': password}
-    r = requests.post('http://localhost:5000/sessions', data=payload)
+    """ login with right pswd """
+    r = requests.post('http://127.0.0.1:5000/sessions', data={
+        'email': email,
+        'password': password
+    })
     assert r.status_code == 200
-    assert r.json() == {'email': email, 'message': 'logged in'}
+    assert r.json() == {'email': email, 'message': "logged in"}
+    # parse the response cookie to return the session_id for other methods
     return r.cookies.get('session_id')
 
 
-def profile_logged(session_id: str) -> None:
-    """_summary_
+def profile_unlogged() -> None:
+    """ test non-existant session_id """
+    r = requests.get('http://127.0.0.1:5000/profile')
+    assert r.status_code == 403
 
-    Args:
-        session_id (str): _description_
-    """
-    cookies = {'session_id': session_id}
-    r = requests.get('http://localhost:5000/profile', cookies=cookies)
+
+def profile_logged(session_id: str) -> None:
+    """ test existant session_id """
+    r = requests.get('http://127.0.0.1:5000/profile', cookies={
+        'session_id': session_id
+    })
     assert r.status_code == 200
+    assert r.json() == {'email': "guillaume@holberton.io"}
 
 
 def log_out(session_id: str) -> None:
-    """_summary_
-
-    Args:
-        session_id (str): _description_
-    """
-    cookies = {'session_id': session_id}
-    r = requests.delete('http://localhost:5000/sessions', cookies=cookies)
-    
-    if r.status_code == 302:
-        assert r.url == 'http://localhost:5000/'
-    assert r.status_code == 200
+    """ log out """
+    r = requests.delete('http://127.0.0.1:5000/sessions', cookies={
+        'session_id': session_id
+    })
+    # look inside response's history to check that a 302 redirect occured
+    for past_r in r.history:
+        assert past_r.status_code == 302
 
 
 def reset_password_token(email: str) -> str:
-    """_summary_
-
-    Args:
-        email (str): _description_
-
-    Returns:
-        str: _description_
-    """
-    payload = {'email': email}
-    r = requests.post('http://localhost:5000/reset_password', data=payload)
+    """ check that pswd reset token gets generated """
+    r = requests.post('http://127.0.0.1:5000/reset_password', data={
+        'email': email,
+    })
     assert r.status_code == 200
+    # parse json response to return the reset_token for other methods
     return r.json().get('reset_token')
 
 
 def update_password(email: str, reset_token: str, new_password: str) -> None:
-    """_summary_
-
-    Args:
-        email (str): _description_
-        reset_token (str): _description_
-        new_password (str): _description_
-    """
-    payload = {'email': email, 'reset_token': reset_token,
-               'new_password': new_password}
-    r = requests.put('http://localhost:5000/reset_password', data=payload)
+    """ change password """
+    r = requests.put('http://127.0.0.1:5000/reset_password', data={
+        'email': email,
+        'reset_token': reset_token,
+        'new_password': new_password
+    })
     assert r.status_code == 200
-    assert r.json() == {'email': email, 'message': 'Password updated'}
+    assert r.json() == {'email': email, 'message': "Password updated"}
 
 
 EMAIL = "guillaume@holberton.io"
