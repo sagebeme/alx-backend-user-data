@@ -3,6 +3,29 @@
 [](https://s3.amazonaws.com/alx-intranet.hbtn.io/uploads/medias/2019/12/4cb3c8c607afc1d1582d.jpg?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIARDDGGGOUSBVO6H7D%2F20230608%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20230608T110009Z&X-Amz-Expires=86400&X-Amz-SignedHeaders=host&X-Amz-Signature=858cf7f75fce68489de0652d52364e2575c8bf9b79437f406928da45acb45c6d)
 In the industry, you should not implement your own authentication system and use a module or framework that doing it for you (like in Python-Flask: [Flask-User](https://flask-user.readthedocs.io/en/latest/)). Here, for the learning purpose, we will walk through each step of this mechanism to understand it by doing.
 
+---
+
+## What does each file do?
+
+Each answer is the **problem the file solves** and how it fits into the auth service.
+
+### **What does `user.py` do?**  
+It defines the **SQLAlchemy User model** for the `users` table: `id`, `email`, `hashed_password`, `session_id`, `reset_token`. This is the single source of truth for user data in the database.
+
+### **What does `db.py` do?**  
+It implements the **DB class**: connects to SQLite (or another engine), provides a session, and exposes **`add_user(email, hashed_password)`**, **`find_user_by(**kwargs)`**, and **`update_user(user_id, **kwargs)`**. The app never talks to the DB directly; it uses `Auth`, which uses `DB`.
+
+### **What does `auth.py` do?**  
+It implements the **Auth class** that wraps the DB and provides all auth logic: **`_hash_password`**, **`register_user`**, **`valid_login`**, **`create_session`**, **`get_user_from_session_id`**, **`destroy_session`**, **`get_reset_password_token`**, **`update_password`**. The Flask app only calls methods on `Auth`, not on `DB`.
+
+### **What does `app.py` do?**  
+It is the **Flask application**: defines routes **`GET /`**, **`POST /users`** (register), **`POST /sessions`** (login, set session_id cookie), **`DELETE /sessions`** (logout), **`GET /profile`** (current user from cookie), **`POST /reset_password`** (get token), **`PUT /reset_password`** (update password with token). It uses `Auth` for all user/session/password operations.
+
+### **What does `main.py` do?**  
+It is the **end-to-end integration test**: uses the `requests` module to call each endpoint (register, login with wrong password, profile when logged out, login, profile when logged in, logout, get reset token, update password, login with new password) and **asserts** on status codes and response bodies. If everything is correct, running `python3 main.py` produces no output.
+
+---
+
 # Resources
 
 ## Read or watch

@@ -1,6 +1,47 @@
-# Session Authentication
+# 0x02. Session authentication
 
-This project contains tasks for learning to authenticate a user through session authentication.
+This project contains tasks for learning to authenticate a user through **session authentication** (session ID stored in a cookie).
+
+---
+
+## What does each file do?
+
+Each answer is the **problem the file solves** and how it fits into the project.
+
+### **What does `models/base.py` do?**  
+Base class for all models; handles **serialization to/from file** (e.g. JSON). Same role as in Basic Auth.
+
+### **What does `models/user.py` do?**  
+**User model** (email, hashed password, etc.). Used to look up users when validating login and when resolving a session ID to a user.
+
+### **What does `models/user_session.py` do?**  
+It defines the **UserSession model** (e.g. `user_id`, `session_id`) so sessions can be **stored in the database** (or file) instead of only in memory. Used by `SessionDBAuth`.
+
+### **What does `api/v1/app.py` do?**  
+Flask app entry point. It chooses the auth class based on **`AUTH_TYPE`** (e.g. `session_auth`, `session_exp_auth`, `session_db_auth`), runs `before_request` to set `request.current_user`, and excludes paths like `/auth_session/login/` from auth.
+
+### **What does `api/v1/auth/auth.py` do?**  
+Base **Auth** class. It adds **`session_cookie(request)`** to read the session ID from the cookie (name from `SESSION_NAME` env). Used by session auth to identify the user from the cookie.
+
+### **What does `api/v1/auth/basic_auth.py` do?**  
+**Basic authentication** implementation (same as in 0x01). Kept so the API can support both Basic and Session auth depending on `AUTH_TYPE`.
+
+### **What does `api/v1/auth/session_auth.py` do?**  
+It implements **in-memory session auth**: `create_session(user_id)` generates a session ID and stores `user_id_by_session_id[session_id] = user_id`; `user_id_for_session_id(session_id)` returns the user ID; `current_user(request)` uses the session cookie to find the user.
+
+### **What does `api/v1/auth/session_exp_auth.py` do?**  
+It **extends SessionAuth** with **expiration**: each session stores `created_at`; `user_id_for_session_id` returns `None` if the session is older than `SESSION_DURATION` seconds. So sessions expire after a set time.
+
+### **What does `api/v1/auth/session_db_auth.py` do?**  
+It **extends SessionExpAuth** and stores sessions in the **database** (UserSession model). `create_session` creates a UserSession row; `user_id_for_session_id` and `destroy_session` read/delete from the DB. Sessions survive app restarts.
+
+### **What does `api/v1/views/session_auth.py` do?**  
+It defines **`POST /api/v1/auth_session/login`** (accept email/password, create session, set cookie, return user) and **`DELETE /api/v1/auth_session/logout`** (destroy session from cookie). These are the endpoints the browser uses to log in and log out.
+
+### **What do `api/v1/views/index.py` and `api/v1/views/users.py` do?**  
+Same as in Basic Auth: status/stats and user CRUD. `users.py` still handles `GET /api/v1/users/me` for the current user (from session or Basic).
+
+---
 
 ## Tasks To Complete
 
