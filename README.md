@@ -1,17 +1,22 @@
 # ALX Backend — User Data
 
+## Description
+
 Backend track for **personal data handling**, **Basic Auth**, **Session Auth**, and a full **User Authentication Service** (Flask + SQLAlchemy + bcrypt). This README explains **what each folder and file does** and **how to run the exercises** so you can follow or redo them yourself.
 
----
+## Structure
 
-## Repository structure
+* [0x00. Personal data](./0x00-personal_data)
+* [0x01. Basic authentication](./0x01-Basic_authentication)
+* [0x02. Session authentication](./0x02-Session_authentication)
+* [0x03. User authentication service](./0x03-user_authentication_service)
 
 | Folder | Topic | What you'll practice |
 |--------|--------|----------------------|
-| `0x00-personal_data` | PII and logging | Filtering PII in logs, encrypting passwords |
-| `0x01-Basic_authentication` | HTTP Basic Auth | API with Basic Auth, User model, file-based storage |
-| `0x02-Session_authentication` | Session Auth | Cookies, session IDs, login/logout, optional DB/expiry |
-| `0x03-user_authentication_service` | Full auth service | User/DB/Auth, registration, login, sessions, reset password |
+| [0x00-personal_data](./0x00-personal_data) | PII and logging | Filtering PII in logs, encrypting passwords |
+| [0x01-Basic_authentication](./0x01-Basic_authentication) | HTTP Basic Auth | API with Basic Auth, User model, file-based storage |
+| [0x02-Session_authentication](./0x02-Session_authentication) | Session Auth | Cookies, session IDs, login/logout, optional DB/expiry |
+| [0x03-user_authentication_service](./0x03-user_authentication_service) | Full auth service | User/DB/Auth, registration, login, sessions, reset password |
 
 ---
 
